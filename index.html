@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Test</title>
+</head>
+<body>
+<script>
+    function moveSquareAndFetchData(url) {
+        // Создаем квадрат
+        const square = document.createElement("div");
+        square.style.width = "100px";
+        square.style.height = "100px";
+        square.style.backgroundColor = "black";
+        square.style.position = "absolute";
+        square.style.left = "0";
+        square.style.top = "0";
+        document.body.appendChild(square);
+
+        // Запускаем движение через секунду после вызова функции
+        const startTime = Date.now();
+        const moveInterval = setInterval(() => {
+            const elapsedTime = Date.now() - startTime;
+            const distance = elapsedTime / 10; // скорость 100px/с
+            square.style.left = `${distance}px`;
+        }, 10);
+
+        // Отправляем GET-запрос через секунду после вызова функции
+        setTimeout(() => {
+            clearInterval(moveInterval); // останавливаем движение
+            fetch(url)
+                .then(response => {
+                    if (response.ok) {
+                        return response.text(); // если ответ успешный, возвращаем текст ответа
+                    } else {
+                        throw new Error("Network response was not ok");
+                    }
+                })
+                .then(data => {
+                    // Если ответ успешный, меняем цвет квадрата в соответствии с содержимым ответа
+                    if (data === "1") {
+                        square.style.backgroundColor = "green";
+                    } else if (data === "0") {
+                        square.style.backgroundColor = "blue";
+                    } else {
+                        square.style.backgroundColor = "red";
+                    }
+                })
+                .catch(error => {
+                    // Если запрос не удался, меняем цвет квадрата на красный
+                    square.style.backgroundColor = "red";
+                    console.error("Error fetching data:", error);
+                });
+        }, 2000); // останавливаем движение и отправляем запрос через две секунды после вызова функции
+    }
+
+    moveSquareAndFetchData('https://keev.me/f/slowpoke.php');
+</script>
+</body>
+</html>
+</body>
+</html>
