@@ -7,57 +7,73 @@
 </head>
 <body>
 <script>
-    function moveSquareAndFetchData(url) {
-        // Создаем квадрат
+    function makeRequestAndAnimate(url) {
+        const colorMap = {
+                0: 'blue',
+                1: 'green'
+              }
+      
+        let selectedColor;
+        let setColor;
+        let finishTime = false;
+        const body = document.querySelector("body");
         const square = document.createElement("div");
         square.style.width = "100px";
         square.style.height = "100px";
         square.style.backgroundColor = "black";
         square.style.position = "absolute";
-        square.style.left = "0";
-        square.style.top = "0";
-        document.body.appendChild(square);
+        square.style.top = "0px";
+        square.style.left = "0px";
+        body.appendChild(square);
 
-        // Запускаем движение через секунду после вызова функции
-        const startTime = Date.now();
-        const moveInterval = setInterval(() => {
-            const elapsedTime = Date.now() - startTime;
-            const distance = elapsedTime / 10; // скорость 100px/с
-            square.style.left = `${distance}px`;
-        }, 10);
+        setTimeout(function () {
+            let posX = 0;
+            const intervalId = setInterval(function () {
+                square.style.left = posX + "px";
+                posX += 1;
+            }, 10);
 
-        // Отправляем GET-запрос через секунду после вызова функции
-        setTimeout(() => {
-            clearInterval(moveInterval); // останавливаем движение
+            const setColor = (colorParam) => {
+                square.style.backgroundColor = colorParam;
+            }
+               setTimeout( () => {
+                clearInterval(intervalId);
+                 finishTime = true
+                 if (selectedColor) {
+                    setColor(selectedColor)
+                 }
+
+            }, 1000);
+          
             fetch(url)
+                        
                 .then(response => {
                     if (response.ok) {
-                        return response.text(); // если ответ успешный, возвращаем текст ответа
+                        return response.text();
                     } else {
                         throw new Error("Network response was not ok");
                     }
                 })
                 .then(data => {
-                    // Если ответ успешный, меняем цвет квадрата в соответствии с содержимым ответа
-                    if (data === "1") {
-                        square.style.backgroundColor = "green";
-                    } else if (data === "0") {
-                        square.style.backgroundColor = "blue";
-                    } else {
-                        square.style.backgroundColor = "red";
-                    }
+                     selectedColor = colorMap[data] ? colorMap[data]: 'red';
+                   if (finishTime) {
+                      setColor(selectedColor);
+                   }
                 })
                 .catch(error => {
-                    // Если запрос не удался, меняем цвет квадрата на красный
-                    square.style.backgroundColor = "red";
+                    selectedColor = "red";
                     console.error("Error fetching data:", error);
+                     if (finishTime) {
+                        setColor(selectedColor);
+                     }
                 });
-        }, 2000); // останавливаем движение и отправляем запрос через две секунды после вызова функции
+          
+        }, 1000);
     }
 
-    moveSquareAndFetchData('https://keev.me/f/slowpoke.php');
+    makeRequestAndAnimate("https://keev.me/f/slowpoke.php");
+
 </script>
-</body>
-</html>
+
 </body>
 </html>
